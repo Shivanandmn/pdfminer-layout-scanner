@@ -25,11 +25,11 @@ def with_pdf (pdf_doc, fn, pdf_pwd, *args):
         # create a parser object associated with the file object
         parser = PDFParser(fp)
         # create a PDFDocument object that stores the document structure
-        doc = PDFDocument(parser)
+        doc = PDFDocument(parser,pdf_pwd)
         # connect the parser and document objects
         parser.set_document(doc)
         # supply the password for initialization
-        doc.initialize(pdf_pwd)
+        
 
         if doc.is_extractable:
             # apply the function and return the result
@@ -86,6 +86,7 @@ def determine_image_type (stream_first_4_bytes):
     """Find out the image file type based on the magic number comparison of the first 4 (or 2) bytes"""
     file_type = None
     bytes_as_hex = b2a_hex(stream_first_4_bytes)
+    bytes_as_hex = (bytes_as_hex).decode('utf-8')
     if bytes_as_hex.startswith('ffd8'):
         file_type = '.jpeg'
     elif bytes_as_hex == '89504e47':
@@ -164,7 +165,7 @@ def parse_lt_objs (lt_objs, page_number, images_folder, text_content=None):
                 # use html style <img /> tag to mark the position of the image within the text
                 text_content.append('<img src="'+os.path.join(images_folder, saved_file)+'" />')
             else:
-                print >> sys.stderr, "error saving image on page", page_number, lt_obj.__repr__
+                print(sys.stderr, "error saving image on page", page_number, lt_obj.__repr__)
         elif isinstance(lt_obj, LTFigure):
             # LTFigure objects are containers for other LT* objects, so recurse through the children
             text_content.append(parse_lt_objs(lt_obj, page_number, images_folder, text_content))
